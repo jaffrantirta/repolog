@@ -8,6 +8,7 @@ export const users = pgTable('users', {
   image: text('image'),
   githubAccessToken: text('github_access_token'),
   anthropicApiKey: text('anthropic_api_key'),
+  onboardingCompleted: boolean('onboarding_completed').notNull().default(false),
   createdAt: timestamp('created_at').notNull().defaultNow(),
   updatedAt: timestamp('updated_at').notNull().defaultNow(),
 })

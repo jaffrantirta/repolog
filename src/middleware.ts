@@ -6,7 +6,7 @@ export const runtime = 'nodejs'
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  const protectedPaths = ['/dashboard', '/reports', '/settings']
+  const protectedPaths = ['/dashboard', '/reports', '/settings', '/onboarding']
   const isProtected = protectedPaths.some(p => pathname.startsWith(p))
   if (!isProtected) return NextResponse.next()
 
@@ -18,5 +18,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/reports/:path*', '/settings/:path*'],
+  matcher: ['/dashboard/:path*', '/reports/:path*', '/settings/:path*', '/onboarding'],
 }

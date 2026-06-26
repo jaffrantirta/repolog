@@ -1,6 +1,21 @@
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
 import { formatDate } from '@/lib/utils'
 
+function stripMarkdown(text: string): string {
+  return text
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    .replace(/\*([^*]+)\*/g, '$1')
+    .replace(/^\s*[-*+]\s+/gm, '• ')
+    .trim()
+}
+
+function resolveAlias(name: string, aliases: Record<string, string>): string {
+  if (aliases[name]) return aliases[name]
+  const entry = Object.entries(aliases).find(([k]) => k.split('/')[1] === name)
+  return entry ? entry[1] : name
+}
+
 const styles = StyleSheet.create({
   page: { padding: 40, fontFamily: 'Helvetica', fontSize: 10, color: '#1a1a1a' },
   header: { backgroundColor: '#1a1a2e', padding: 20, marginBottom: 20 },
@@ -20,12 +35,13 @@ const styles = StyleSheet.create({
 })
 
 export function ReportDocument({ report, profile, content }: {
-  report: { title: string; startDate: string; endDate: string; sections: unknown; language?: string }
+  report: { title: string; startDate: string; endDate: string; sections: unknown; language?: string; repoAliases?: Record<string, string> | null }
   profile: { name: string; email: string; position: string; company: string } | null
   content: Record<string, unknown>
 }) {
   const sections = report.sections as string[]
   const lang = report.language ?? 'id'
+  const aliases = report.repoAliases ?? {}
   const summary = content.summary as { feature_count: number; bugfix_count: number; improvement_count: number; chore_count: number; systems_updated: string[] } | undefined
 
   return (
@@ -55,7 +71,7 @@ export function ReportDocument({ report, profile, content }: {
         {sections.includes('executive_summary') && content.executive_summary != null && (
           <View>
             <Text style={styles.sectionTitle}>Ringkasan Eksekutif</Text>
-            <Text style={styles.para}>{content.executive_summary as string}</Text>
+            <Text style={styles.para}>{stripMarkdown(content.executive_summary as string)}</Text>
           </View>
         )}
 
@@ -129,7 +145,7 @@ export function ReportDocument({ report, profile, content }: {
             {summary?.systems_updated && (
               <View style={{ alignItems: 'flex-end' }}>
                 <Text style={styles.small}>Sistem:</Text>
-                {summary.systems_updated.map((s, i) => <Text key={i} style={[styles.small, { color: '#1a1a2e' }]}>{s}</Text>)}
+                {summary.systems_updated.map((s, i) => <Text key={i} style={[styles.small, { color: '#1a1a2e' }]}>{resolveAlias(s, aliases)}</Text>)}
               </View>
             )}
           </View>

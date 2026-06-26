@@ -1,6 +1,7 @@
 import type { InferSelectModel } from 'drizzle-orm'
 import type { reports, developerProfiles } from '@/lib/db/schema'
 import { formatDate } from '@/lib/utils'
+import ReactMarkdown from 'react-markdown'
 
 type Report = InferSelectModel<typeof reports>
 type Profile = InferSelectModel<typeof developerProfiles> | null
@@ -10,10 +11,17 @@ interface IssueResolved { number: number; description: string; system: string; r
 interface WeekSummary { week: string; period: string; focus: string; summary: string; status: string }
 interface FuturePlan { priority: string; title: string; description: string; expected_benefit: string }
 
+function resolveAlias(name: string, aliases: Record<string, string>): string {
+  if (aliases[name]) return aliases[name]
+  const entry = Object.entries(aliases).find(([k]) => k.split('/')[1] === name)
+  return entry ? entry[1] : name
+}
+
 export default function ReportPreview({ report, profile, content }: { report: Report; profile: Profile; content: Record<string, unknown> }) {
   const summary = content.summary as { feature_count: number; bugfix_count: number; improvement_count: number; chore_count: number; systems_updated: string[] } | undefined
   const sections = report.sections as string[]
   const lang = report.language ?? 'id'
+  const aliases = (report.repoAliases as Record<string, string> | null) ?? {}
 
   return (
     <div className="bg-white text-[#1a1a1a] rounded-2xl overflow-hidden shadow-2xl">
@@ -53,7 +61,21 @@ export default function ReportPreview({ report, profile, content }: { report: Re
         {sections.includes('executive_summary') && content.executive_summary != null && (
           <section>
             <h2 className="text-lg font-bold border-b-2 border-[#1a1a2e] pb-2 mb-4">Ringkasan Eksekutif</h2>
-            <p className="text-sm leading-relaxed text-[#333]">{content.executive_summary as string}</p>
+            <ReactMarkdown
+              components={{
+                h1: ({ children }) => <h2 className="text-base font-bold mt-3 mb-1 text-[#1a1a1a]">{children}</h2>,
+                h2: ({ children }) => <h3 className="text-sm font-bold mt-3 mb-1 text-[#1a1a1a]">{children}</h3>,
+                h3: ({ children }) => <h4 className="text-sm font-semibold mt-2 mb-1 text-[#333]">{children}</h4>,
+                p: ({ children }) => <p className="text-sm leading-relaxed text-[#333] mb-2">{children}</p>,
+                strong: ({ children }) => <strong className="font-semibold text-[#1a1a1a]">{children}</strong>,
+                em: ({ children }) => <em className="italic">{children}</em>,
+                ul: ({ children }) => <ul className="list-disc list-inside text-sm text-[#333] space-y-0.5 mb-2">{children}</ul>,
+                ol: ({ children }) => <ol className="list-decimal list-inside text-sm text-[#333] space-y-0.5 mb-2">{children}</ol>,
+                li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+              }}
+            >
+              {content.executive_summary as string}
+            </ReactMarkdown>
           </section>
         )}
 
@@ -150,7 +172,7 @@ export default function ReportPreview({ report, profile, content }: { report: Re
               <div className="text-right text-xs text-[#888]">
                 <p>Sistem Terupdate:</p>
                 {(content.summary as { systems_updated: string[] } | undefined)?.systems_updated?.map((s, i) => (
-                  <p key={i} className="font-medium text-[#1a1a2e]">{s}</p>
+                  <p key={i} className="font-medium text-[#1a1a2e]">{resolveAlias(s, aliases)}</p>
                 ))}
               </div>
             </div>

@@ -7,6 +7,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
 import ReportStatus from './ReportStatus'
+import { formatDate } from '@/lib/utils'
 
 export default async function ReportPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -31,7 +32,7 @@ export default async function ReportPage({ params }: { params: Promise<{ id: str
         </Link>
         <div>
           <h1 className="text-xl font-bold">{report.title}</h1>
-          <p className="text-[#666] text-sm">{report.startDate} — {report.endDate}</p>
+          <p className="text-[#666] text-sm">{formatDate(report.startDate, report.language ?? 'id')} — {formatDate(report.endDate, report.language ?? 'id')}</p>
         </div>
       </div>
 

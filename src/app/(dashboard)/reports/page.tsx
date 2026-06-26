@@ -41,7 +41,7 @@ export default async function ReportsPage() {
                   report.status === 'error' ? 'bg-red-900/30 border-red-800 text-red-400' :
                   'bg-[#1a1a1a] border-[#2a2a2a] text-[#666]'
                 }`}>{report.status}</span>
-                <span className="text-xs text-[#444]">{formatDate(report.createdAt)}</span>
+                <span className="text-xs text-[#444]">{formatDate(report.createdAt.toISOString().slice(0, 10))}</span>
               </div>
             </Link>
           ))}

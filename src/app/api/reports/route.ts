@@ -22,6 +22,7 @@ export async function POST(req: NextRequest) {
     startDate: body.startDate,
     endDate: body.endDate,
     repos: body.repos,
+    repoAliases: body.repoAliases ?? {},
     sections: body.sections,
     language: body.language ?? 'id',
     futurePlansInput: body.futurePlansInput,

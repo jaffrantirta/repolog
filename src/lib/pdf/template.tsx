@@ -1,4 +1,5 @@
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
+import { formatDate } from '@/lib/utils'
 
 const styles = StyleSheet.create({
   page: { padding: 40, fontFamily: 'Helvetica', fontSize: 10, color: '#1a1a1a' },
@@ -19,11 +20,12 @@ const styles = StyleSheet.create({
 })
 
 export function ReportDocument({ report, profile, content }: {
-  report: { title: string; startDate: string; endDate: string; sections: unknown }
+  report: { title: string; startDate: string; endDate: string; sections: unknown; language?: string }
   profile: { name: string; email: string; position: string; company: string } | null
   content: Record<string, unknown>
 }) {
   const sections = report.sections as string[]
+  const lang = report.language ?? 'id'
   const summary = content.summary as { feature_count: number; bugfix_count: number; improvement_count: number; chore_count: number; systems_updated: string[] } | undefined
 
   return (
@@ -31,7 +33,7 @@ export function ReportDocument({ report, profile, content }: {
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>{report.title}</Text>
-          <Text style={styles.headerSub}>{profile?.company || ''} · Periode: {report.startDate} – {report.endDate}</Text>
+          <Text style={styles.headerSub}>{profile?.company || ''} · Periode: {formatDate(report.startDate, lang)} – {formatDate(report.endDate, lang)}</Text>
         </View>
 
         {sections.includes('highlight_stats') && summary != null && (

@@ -55,6 +55,7 @@ export const reports = pgTable('reports', {
   startDate: text('start_date').notNull(),
   endDate: text('end_date').notNull(),
   repos: jsonb('repos').notNull().default([]),
+  repoAliases: jsonb('repo_aliases'),
   sections: jsonb('sections').notNull().default([]),
   status: text('status').notNull().default('draft'), // draft | generating | done | error
   language: text('language').notNull().default('id'), // id | en

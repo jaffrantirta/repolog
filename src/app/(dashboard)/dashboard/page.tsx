@@ -62,7 +62,7 @@ export default async function DashboardPage() {
                 }`}>
                   {report.status}
                 </span>
-                <span className="text-xs text-[#444]">{formatDate(report.createdAt)}</span>
+                <span className="text-xs text-[#444]">{formatDate(report.createdAt.toISOString().slice(0, 10))}</span>
               </div>
             </Link>
           ))}

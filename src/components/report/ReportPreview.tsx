@@ -1,5 +1,6 @@
 import type { InferSelectModel } from 'drizzle-orm'
 import type { reports, developerProfiles } from '@/lib/db/schema'
+import { formatDate } from '@/lib/utils'
 
 type Report = InferSelectModel<typeof reports>
 type Profile = InferSelectModel<typeof developerProfiles> | null
@@ -12,6 +13,7 @@ interface FuturePlan { priority: string; title: string; description: string; exp
 export default function ReportPreview({ report, profile, content }: { report: Report; profile: Profile; content: Record<string, unknown> }) {
   const summary = content.summary as { feature_count: number; bugfix_count: number; improvement_count: number; chore_count: number; systems_updated: string[] } | undefined
   const sections = report.sections as string[]
+  const lang = report.language ?? 'id'
 
   return (
     <div className="bg-white text-[#1a1a1a] rounded-2xl overflow-hidden shadow-2xl">
@@ -23,8 +25,8 @@ export default function ReportPreview({ report, profile, content }: { report: Re
             <p className="text-[#8888aa] text-sm mt-1">{profile?.company || 'Nama Perusahaan'}</p>
           </div>
           <div className="text-right text-sm text-[#8888aa]">
-            <p>Dibuat: {new Date(report.createdAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-            <p className="mt-1">Periode: {report.startDate} – {report.endDate}</p>
+            <p>Dibuat: {formatDate(new Date(report.createdAt).toISOString().slice(0, 10), lang)}</p>
+            <p className="mt-1">Periode: {formatDate(report.startDate, lang)} – {formatDate(report.endDate, lang)}</p>
           </div>
         </div>
       </div>

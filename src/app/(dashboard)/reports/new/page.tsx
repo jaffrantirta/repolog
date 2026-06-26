@@ -35,6 +35,7 @@ export default function NewReportPage() {
   const router = useRouter()
   const [step, setStep] = useState<Step>('repos')
   const [selectedRepos, setSelectedRepos] = useState<string[]>([])
+  const [repoAliases, setRepoAliases] = useState<Record<string, string>>({})
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [sections, setSections] = useState<string[]>(DEFAULT_SECTIONS)
@@ -138,7 +139,7 @@ export default function NewReportPage() {
       const createRes = await fetch('/api/reports', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, startDate, endDate, repos: selectedRepos, sections, language, futurePlansInput }),
+        body: JSON.stringify({ title, startDate, endDate, repos: selectedRepos, repoAliases, sections, language, futurePlansInput }),
       })
       if (!createRes.ok) throw new Error('Failed to create report')
       const { reportId: newReportId } = await createRes.json()
@@ -203,7 +204,7 @@ export default function NewReportPage() {
         {step === 'repos' && (
           <>
             <h2 className="font-semibold text-lg">Select Repositories</h2>
-            <RepoSelector selected={selectedRepos} onChange={setSelectedRepos} />
+            <RepoSelector selected={selectedRepos} onChange={setSelectedRepos} aliases={repoAliases} onAliasChange={setRepoAliases} />
           </>
         )}
 

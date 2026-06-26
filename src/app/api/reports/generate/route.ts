@@ -33,7 +33,12 @@ export async function POST(req: NextRequest) {
 
   try {
     const language = report.language ?? 'id'
-    const result = await classifyCommits(commits, apiKey, language)
+    const repoAliases = (report.repoAliases as Record<string, string> | null) ?? {}
+    const aliasedCommits = (commits as Record<string, unknown>[]).map(c => ({
+      ...c,
+      repo: repoAliases[c.repo as string] ?? c.repo,
+    }))
+    const result = await classifyCommits(aliasedCommits, apiKey, language)
     const sectionList = (report.sections as string[]).filter(s =>
       !['kop', 'periode', 'highlight_stats', 'developer_info'].includes(s)
     )

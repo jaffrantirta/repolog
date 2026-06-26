@@ -35,6 +35,7 @@ export default function DemoPage() {
     startDate: DEMO_REPORT_CONFIG.startDate,
     endDate: DEMO_REPORT_CONFIG.endDate,
     repos: DEMO_REPORT_CONFIG.repos,
+    repoAliases: null,
     sections: DEMO_REPORT_CONFIG.sections,
     language: 'id',
     status: 'done' as const,

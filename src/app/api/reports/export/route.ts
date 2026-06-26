@@ -27,6 +27,7 @@ export async function GET(req: NextRequest) {
       startDate: report.startDate,
       endDate: report.endDate,
       sections: report.sections,
+      language: report.language,
     },
     profile: profile ? { name: profile.name, email: profile.email, position: profile.position, company: profile.company } : null,
     content: report.generatedContent as Record<string, unknown>,

@@ -8,7 +8,7 @@ export function getReportsCached(userId: string) {
     async () =>
       db.select().from(reports).where(eq(reports.userId, userId)).orderBy(desc(reports.createdAt)),
     ['reports', userId],
-    { tags: [`reports-${userId}`] }
+    { tags: [`reports-${userId}`], revalidate: 60 }
   )()
 }
 
@@ -22,7 +22,7 @@ export function getReportCached(id: string, userId: string) {
       return row ?? null
     },
     ['report', id, userId],
-    { tags: [`report-${id}`, `reports-${userId}`] }
+    { tags: [`report-${id}`, `reports-${userId}`], revalidate: 60 }
   )()
 }
 
@@ -36,6 +36,6 @@ export function getProfileCached(userId: string) {
       return row ?? null
     },
     ['profile', userId],
-    { tags: [`profile-${userId}`] }
+    { tags: [`profile-${userId}`], revalidate: 300 }
   )()
 }

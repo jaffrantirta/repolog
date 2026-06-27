@@ -1,4 +1,3 @@
-import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
 import { headers } from 'next/headers'
 import Link from 'next/link'
@@ -6,7 +5,6 @@ import { GitCommit, FileText, Zap, Download, Globe, ChevronRight, Check } from '
 
 export default async function Home() {
   const session = await auth.api.getSession({ headers: await headers() })
-  if (session) redirect('/dashboard')
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -44,12 +42,21 @@ export default async function Home() {
               <Link href="/demo" className="text-sm text-[#888] hover:text-white transition-colors">
                 Demo
               </Link>
-              <Link
-                href="/login"
-                className="px-4 py-1.5 bg-white text-black rounded-lg text-sm font-semibold hover:bg-[#e5e5e5] transition-colors"
-              >
-                Sign in
-              </Link>
+              {session ? (
+                <Link
+                  href="/dashboard"
+                  className="px-4 py-1.5 bg-white text-black rounded-lg text-sm font-semibold hover:bg-[#e5e5e5] transition-colors"
+                >
+                  Dashboard →
+                </Link>
+              ) : (
+                <Link
+                  href="/login"
+                  className="px-4 py-1.5 bg-white text-black rounded-lg text-sm font-semibold hover:bg-[#e5e5e5] transition-colors"
+                >
+                  Sign in
+                </Link>
+              )}
             </div>
           </div>
         </nav>

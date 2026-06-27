@@ -1,9 +1,17 @@
 import { auth } from '@/lib/auth'
 import { headers } from 'next/headers'
 import Link from 'next/link'
-import { Plus, FileText } from 'lucide-react'
-import { formatDate } from '@/lib/utils'
 import { getReportsCached } from '@/lib/data'
+
+function StatusBadge({ status }: { status: string }) {
+  const styles: Record<string, string> = {
+    done: 'text-green-500',
+    generating: 'text-yellow-500',
+    error: 'text-red-500',
+    draft: 'text-[#444]',
+  }
+  return <span className={`text-xs ${styles[status] ?? 'text-[#444]'}`}>[{status}]</span>
+}
 
 export default async function ReportsPage() {
   const session = await auth.api.getSession({ headers: await headers() })
@@ -12,34 +20,56 @@ export default async function ReportsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Reports</h1>
-        <Link href="/reports/new" className="flex items-center gap-2 px-4 py-2 bg-white text-black rounded-xl text-sm font-semibold hover:bg-[#e5e5e5] transition-colors">
-          <Plus size={16} /> New Report
+        <div>
+          <p className="text-xs text-[#444] mb-1">
+            <span className="text-[#333]">$</span> repolog list --all
+          </p>
+          <p className="text-xs text-[#555]">{allReports.length} report{allReports.length !== 1 ? 's' : ''} found</p>
+        </div>
+        <Link
+          href="/reports/new"
+          className="px-3 py-1.5 bg-[#1a1a1a] border border-[#2a2a2a] text-[#aaa] rounded text-xs hover:border-green-900 hover:text-green-400 transition-colors"
+        >
+          $ generate new →
         </Link>
       </div>
 
       {allReports.length === 0 ? (
-        <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-12 text-center">
-          <FileText size={40} className="mx-auto text-[#333] mb-4" />
-          <p className="text-[#666] text-sm">No reports yet. Create your first one!</p>
+        <div className="border border-[#1a1a1a] rounded p-12 text-center space-y-3">
+          <p className="text-xs text-[#333]">$ repolog list</p>
+          <p className="text-xs text-[#444]">no reports yet.</p>
+          <Link href="/reports/new" className="text-xs text-[#555] hover:text-[#888] transition-colors underline">
+            generate your first report →
+          </Link>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="border border-[#1a1a1a] rounded divide-y divide-[#111]">
           {allReports.map(report => (
-            <Link key={report.id} href={`/reports/${report.id}`}
-              className="flex items-center justify-between bg-[#111] border border-[#1f1f1f] rounded-xl px-5 py-4 hover:border-[#333] transition-colors">
-              <div>
-                <p className="font-medium text-white">{report.title}</p>
-                <p className="text-xs text-[#666] mt-0.5">{report.startDate} — {report.endDate} · {(report.repos as string[]).length} repos</p>
+            <Link
+              key={report.id}
+              href={`/reports/${report.id}`}
+              className="flex items-center justify-between px-4 py-3 hover:bg-[#0d0d0d] transition-colors group"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="text-[#333] group-hover:text-[#555] text-xs flex-shrink-0">→</span>
+                <div className="min-w-0">
+                  <p className="text-xs text-[#888] group-hover:text-white transition-colors truncate">
+                    {report.title.toLowerCase()}
+                  </p>
+                  <p className="text-xs text-[#333] mt-0.5">
+                    {report.startDate} — {report.endDate}
+                    <span className="mx-1.5">·</span>
+                    {(report.repos as string[]).length} repo{(report.repos as string[]).length !== 1 ? 's' : ''}
+                    <span className="mx-1.5">·</span>
+                    {report.language ?? 'id'}
+                  </p>
+                </div>
               </div>
-              <div className="flex items-center gap-3">
-                <span className={`text-xs px-2 py-0.5 rounded-full border ${
-                  report.status === 'done' ? 'bg-green-900/30 border-green-800 text-green-400' :
-                  report.status === 'generating' ? 'bg-yellow-900/30 border-yellow-800 text-yellow-400' :
-                  report.status === 'error' ? 'bg-red-900/30 border-red-800 text-red-400' :
-                  'bg-[#1a1a1a] border-[#2a2a2a] text-[#666]'
-                }`}>{report.status}</span>
-                <span className="text-xs text-[#444]">{formatDate(new Date(report.createdAt).toISOString().slice(0, 10))}</span>
+              <div className="flex items-center gap-4 flex-shrink-0 ml-3">
+                <StatusBadge status={report.status} />
+                <span className="text-xs text-[#333]">
+                  {new Date(report.createdAt).toISOString().slice(0, 10)}
+                </span>
               </div>
             </Link>
           ))}

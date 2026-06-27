@@ -8,10 +8,12 @@ export default async function SettingsPage() {
   const profile = await getProfileCached(session!.user.id)
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="max-w-2xl space-y-5">
       <div>
-        <h1 className="text-2xl font-bold">Settings</h1>
-        <p className="text-[#666] text-sm mt-1">Configure your developer profile and API key</p>
+        <p className="text-xs text-[#444] mb-1">
+          <span className="text-[#333]">$</span> repolog config --edit
+        </p>
+        <p className="text-xs text-[#555]">configure your developer profile and api key</p>
       </div>
       <SettingsForm initialProfile={profile} />
     </div>

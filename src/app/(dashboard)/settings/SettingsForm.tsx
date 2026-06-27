@@ -28,44 +28,53 @@ export default function SettingsForm({ initialProfile }: { initialProfile: Profi
     setTimeout(() => setSaved(false), 2000)
   }
 
-  const inputClass = "w-full bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl px-3 py-2.5 text-sm text-white placeholder-[#444] focus:outline-none focus:border-[#444]"
-  const labelClass = "text-xs text-[#666] mb-1.5 block"
+  const inputClass =
+    'w-full bg-[#0d0d0d] border border-[#1a1a1a] rounded px-3 py-2 text-xs text-[#aaa] placeholder-[#333] focus:outline-none focus:border-[#2a2a2a] font-mono'
+  const labelClass = 'text-xs text-[#444] mb-1.5 block'
 
   return (
     <div className="space-y-6">
-      <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-6 space-y-4">
-        <h2 className="font-semibold">Developer Profile</h2>
-        <p className="text-xs text-[#666]">This information appears in the report header and footer.</p>
+      {/* Developer profile */}
+      <div className="border border-[#1a1a1a] rounded p-5 space-y-4">
+        <div>
+          <p className="text-xs text-[#444] mb-0.5"># developer profile</p>
+          <p className="text-xs text-[#333]">appears in the report header and footer.</p>
+        </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className={labelClass}>Full Name</label>
-            <input value={name} onChange={e => setName(e.target.value)} placeholder="John Doe" className={inputClass} />
+            <label className={labelClass}>full name</label>
+            <input value={name} onChange={e => setName(e.target.value)} placeholder="john doe" className={inputClass} />
           </div>
           <div>
-            <label className={labelClass}>Email</label>
+            <label className={labelClass}>email</label>
             <input value={email} onChange={e => setEmail(e.target.value)} placeholder="john@company.com" className={inputClass} />
           </div>
           <div>
-            <label className={labelClass}>Position</label>
-            <input value={position} onChange={e => setPosition(e.target.value)} placeholder="Full Stack Developer" className={inputClass} />
+            <label className={labelClass}>position</label>
+            <input value={position} onChange={e => setPosition(e.target.value)} placeholder="full stack developer" className={inputClass} />
           </div>
           <div>
-            <label className={labelClass}>Company</label>
-            <input value={company} onChange={e => setCompany(e.target.value)} placeholder="PT. Teknologi Maju" className={inputClass} />
+            <label className={labelClass}>company</label>
+            <input value={company} onChange={e => setCompany(e.target.value)} placeholder="pt. teknologi maju" className={inputClass} />
           </div>
         </div>
       </div>
 
-      <div className="bg-[#111] border border-[#1f1f1f] rounded-2xl p-6 space-y-4">
-        <h2 className="font-semibold">AI API Key</h2>
-        <p className="text-xs text-[#666]">Enter your TokenRouter or Anthropic API key. Used for report generation. Leave blank to use demo mode key.</p>
+      {/* API key */}
+      <div className="border border-[#1a1a1a] rounded p-5 space-y-4">
         <div>
-          <label className={labelClass}>API Key</label>
+          <p className="text-xs text-[#444] mb-0.5"># ai api key</p>
+          <p className="text-xs text-[#333]">
+            enter your anthropic or tokenrouter api key. leave blank to use the shared key.
+          </p>
+        </div>
+        <div>
+          <label className={labelClass}>api key</label>
           <input
             type="password"
             value={apiKey}
             onChange={e => setApiKey(e.target.value)}
-            placeholder={initialProfile ? '••••••••••••••••' : 'sk-ant-...'}
+            placeholder={initialProfile ? '••••••••••••••••  (key already saved)' : 'sk-ant-...'}
             className={inputClass}
           />
         </div>
@@ -74,9 +83,13 @@ export default function SettingsForm({ initialProfile }: { initialProfile: Profi
       <button
         onClick={handleSave}
         disabled={saving}
-        className="px-6 py-2.5 bg-white text-black rounded-xl text-sm font-semibold hover:bg-[#e5e5e5] transition-colors disabled:opacity-60"
+        className={`px-4 py-2 rounded text-xs font-bold transition-colors disabled:opacity-50 ${
+          saved
+            ? 'bg-green-950 border border-green-900 text-green-400'
+            : 'bg-[#1a1a1a] border border-[#2a2a2a] text-[#aaa] hover:border-[#444] hover:text-white'
+        }`}
       >
-        {saved ? '✓ Saved' : saving ? 'Saving…' : 'Save Settings'}
+        {saved ? '✓ saved' : saving ? 'saving...' : '$ save settings'}
       </button>
     </div>
   )

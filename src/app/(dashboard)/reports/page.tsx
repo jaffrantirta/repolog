@@ -1,15 +1,13 @@
 import { auth } from '@/lib/auth'
 import { headers } from 'next/headers'
-import { db } from '@/lib/db'
-import { reports } from '@/lib/db/schema'
-import { eq, desc } from 'drizzle-orm'
 import Link from 'next/link'
 import { Plus, FileText } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
+import { getReportsCached } from '@/lib/data'
 
 export default async function ReportsPage() {
   const session = await auth.api.getSession({ headers: await headers() })
-  const allReports = await db.select().from(reports).where(eq(reports.userId, session!.user.id)).orderBy(desc(reports.createdAt))
+  const allReports = await getReportsCached(session!.user.id)
 
   return (
     <div className="space-y-6">

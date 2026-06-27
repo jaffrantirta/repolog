@@ -6,6 +6,7 @@ import { eq } from 'drizzle-orm'
 import { classifyCommits } from '@/lib/ai/classify'
 import { generateSections } from '@/lib/ai/generate'
 import { headers } from 'next/headers'
+import { revalidateTag } from 'next/cache'
 
 export async function POST(req: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() })
@@ -59,6 +60,8 @@ export async function POST(req: NextRequest) {
     }
 
     await db.update(reports).set({ status: 'done', generatedContent, updatedAt: new Date() }).where(eq(reports.id, reportId))
+    revalidateTag(`report-${reportId}`)
+    revalidateTag(`reports-${session.user.id}`)
     return NextResponse.json({ ok: true })
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
@@ -67,6 +70,8 @@ export async function POST(req: NextRequest) {
       status: 'error',
       generatedContent: { error: message },
     }).where(eq(reports.id, reportId))
+    revalidateTag(`report-${reportId}`)
+    revalidateTag(`reports-${session.user.id}`)
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }

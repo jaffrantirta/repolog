@@ -1,20 +1,13 @@
 import { auth } from '@/lib/auth'
 import { headers } from 'next/headers'
-import { db } from '@/lib/db'
-import { reports } from '@/lib/db/schema'
-import { eq, desc } from 'drizzle-orm'
 import Link from 'next/link'
 import { FileText, Plus } from 'lucide-react'
 import { formatDate } from '@/lib/utils'
+import { getReportsCached } from '@/lib/data'
 
 export default async function DashboardPage() {
   const session = await auth.api.getSession({ headers: await headers() })
-  const userReports = await db
-    .select()
-    .from(reports)
-    .where(eq(reports.userId, session!.user.id))
-    .orderBy(desc(reports.createdAt))
-    .limit(10)
+  const userReports = (await getReportsCached(session!.user.id)).slice(0, 10)
 
   return (
     <div className="space-y-6">

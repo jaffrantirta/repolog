@@ -4,6 +4,7 @@ import { db } from '@/lib/db'
 import { developerProfiles, users } from '@/lib/db/schema'
 import { eq } from 'drizzle-orm'
 import { headers } from 'next/headers'
+import { revalidateTag } from 'next/cache'
 
 export async function POST(req: NextRequest) {
   const session = await auth.api.getSession({ headers: await headers() })
@@ -21,5 +22,6 @@ export async function POST(req: NextRequest) {
     await db.update(users).set({ anthropicApiKey: apiKey }).where(eq(users.id, session.user.id))
   }
 
+  revalidateTag(`profile-${session.user.id}`)
   return NextResponse.json({ ok: true })
 }

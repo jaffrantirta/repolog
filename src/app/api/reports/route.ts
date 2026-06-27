@@ -4,6 +4,7 @@ import { db } from '@/lib/db'
 import { reports } from '@/lib/db/schema'
 import { eq, desc } from 'drizzle-orm'
 import { headers } from 'next/headers'
+import { revalidateTag } from 'next/cache'
 
 export async function GET() {
   const session = await auth.api.getSession({ headers: await headers() })
@@ -28,5 +29,6 @@ export async function POST(req: NextRequest) {
     futurePlansInput: body.futurePlansInput,
     status: 'draft',
   }).returning({ id: reports.id })
+  revalidateTag(`reports-${session.user.id}`)
   return NextResponse.json({ reportId: report.id })
 }

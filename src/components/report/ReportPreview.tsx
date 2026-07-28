@@ -1,6 +1,7 @@
 import type { InferSelectModel } from 'drizzle-orm'
 import type { reports, developerProfiles } from '@/lib/db/schema'
 import { formatDate } from '@/lib/utils'
+import { t, resolveAlias } from '@/lib/report-i18n'
 import ReactMarkdown from 'react-markdown'
 
 type Report = InferSelectModel<typeof reports>
@@ -10,12 +11,6 @@ interface KeyHighlight { title: string; system: string; description: string }
 interface IssueResolved { number: number; description: string; system: string; resolved_date: string }
 interface WeekSummary { week: string; period: string; focus: string; summary: string; status: string }
 interface FuturePlan { priority: string; title: string; description: string; expected_benefit: string }
-
-function resolveAlias(name: string, aliases: Record<string, string>): string {
-  if (aliases[name]) return aliases[name]
-  const entry = Object.entries(aliases).find(([k]) => k.split('/')[1] === name)
-  return entry ? entry[1] : name
-}
 
 export default function ReportPreview({ report, profile, content }: { report: Report; profile: Profile; content: Record<string, unknown> }) {
   const summary = content.summary as { feature_count: number; bugfix_count: number; improvement_count: number; chore_count: number; systems_updated: string[] } | undefined
@@ -30,11 +25,11 @@ export default function ReportPreview({ report, profile, content }: { report: Re
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-2xl font-bold">{report.title}</h1>
-            <p className="text-[#8888aa] text-sm mt-1">{profile?.company || 'Nama Perusahaan'}</p>
+            <p className="text-[#8888aa] text-sm mt-1">{profile?.company || t(lang, 'companyName')}</p>
           </div>
           <div className="text-right text-sm text-[#8888aa]">
-            <p>Dibuat: {formatDate(new Date(report.createdAt).toISOString().slice(0, 10), lang)}</p>
-            <p className="mt-1">Periode: {formatDate(report.startDate, lang)} – {formatDate(report.endDate, lang)}</p>
+            <p>{t(lang, 'dibuat')}: {formatDate(new Date(report.createdAt).toISOString().slice(0, 10), lang)}</p>
+            <p className="mt-1">{t(lang, 'periode')}: {formatDate(report.startDate, lang)} – {formatDate(report.endDate, lang)}</p>
           </div>
         </div>
       </div>
@@ -44,10 +39,10 @@ export default function ReportPreview({ report, profile, content }: { report: Re
         {sections.includes('highlight_stats') && summary != null && (
           <div className="grid grid-cols-4 gap-4">
             {[
-              { label: 'Fitur Baru', value: summary.feature_count, color: '#3b82f6' },
-              { label: 'Bug Diperbaiki', value: summary.bugfix_count, color: '#22c55e' },
-              { label: 'Peningkatan', value: summary.improvement_count, color: '#f59e0b' },
-              { label: 'Pemeliharaan', value: summary.chore_count, color: '#8b5cf6' },
+              { label: t(lang, 'featureCount'), value: summary.feature_count, color: '#3b82f6' },
+              { label: t(lang, 'bugfixCount'), value: summary.bugfix_count, color: '#22c55e' },
+              { label: t(lang, 'improvementCount'), value: summary.improvement_count, color: '#f59e0b' },
+              { label: t(lang, 'choreCount'), value: summary.chore_count, color: '#8b5cf6' },
             ].map(({ label, value, color }) => (
               <div key={label} className="bg-[#f8f8f8] rounded-xl p-4 text-center">
                 <p className="text-3xl font-bold" style={{ color }}>{value}</p>
@@ -60,7 +55,7 @@ export default function ReportPreview({ report, profile, content }: { report: Re
         {/* Executive Summary */}
         {sections.includes('executive_summary') && content.executive_summary != null && (
           <section>
-            <h2 className="text-lg font-bold border-b-2 border-[#1a1a2e] pb-2 mb-4">Ringkasan Eksekutif</h2>
+            <h2 className="text-lg font-bold border-b-2 border-[#1a1a2e] pb-2 mb-4">{t(lang, 'executiveSummary')}</h2>
             <ReactMarkdown
               components={{
                 h1: ({ children }) => <h2 className="text-base font-bold mt-3 mb-1 text-[#1a1a1a]">{children}</h2>,
@@ -82,7 +77,7 @@ export default function ReportPreview({ report, profile, content }: { report: Re
         {/* Key Highlights */}
         {sections.includes('key_highlights') && Array.isArray(content.key_highlights) && (
           <section>
-            <h2 className="text-lg font-bold border-b-2 border-[#1a1a2e] pb-2 mb-4">Pencapaian Utama</h2>
+            <h2 className="text-lg font-bold border-b-2 border-[#1a1a2e] pb-2 mb-4">{t(lang, 'keyHighlights')}</h2>
             <div className="space-y-3">
               {(content.key_highlights as KeyHighlight[]).map((h, i) => (
                 <div key={i} className="bg-[#f8f8f8] rounded-xl p-4">
@@ -90,7 +85,7 @@ export default function ReportPreview({ report, profile, content }: { report: Re
                     <span className="w-6 h-6 rounded-full bg-[#1a1a2e] text-white flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">{i + 1}</span>
                     <div>
                       <p className="font-semibold text-sm">{h.title}</p>
-                      <p className="text-xs text-[#666] mb-1">{h.system}</p>
+                      <p className="text-xs text-[#666] mb-1">{resolveAlias(h.system, aliases)}</p>
                       <p className="text-sm text-[#444]">{h.description}</p>
                     </div>
                   </div>
@@ -103,14 +98,14 @@ export default function ReportPreview({ report, profile, content }: { report: Re
         {/* Issues Resolved */}
         {sections.includes('issues_resolved') && Array.isArray(content.issues_resolved) && (
           <section>
-            <h2 className="text-lg font-bold border-b-2 border-[#1a1a2e] pb-2 mb-4">Permasalahan Terselesaikan</h2>
+            <h2 className="text-lg font-bold border-b-2 border-[#1a1a2e] pb-2 mb-4">{t(lang, 'issuesResolved')}</h2>
             <div className="space-y-2">
               {(content.issues_resolved as IssueResolved[]).map((issue, i) => (
                 <div key={i} className="flex gap-4 py-2 border-b border-[#eee] last:border-0">
                   <span className="text-sm font-bold text-[#1a1a2e] flex-shrink-0">#{issue.number || i + 1}</span>
                   <div className="flex-1">
                     <p className="text-sm">{issue.description}</p>
-                    <p className="text-xs text-[#888] mt-0.5">{issue.system} · {issue.resolved_date}</p>
+                    <p className="text-xs text-[#888] mt-0.5">{resolveAlias(issue.system, aliases)} · {issue.resolved_date}</p>
                   </div>
                 </div>
               ))}
@@ -121,7 +116,7 @@ export default function ReportPreview({ report, profile, content }: { report: Re
         {/* Weekly Summary */}
         {sections.includes('weekly_summary') && Array.isArray(content.weekly_summary) && (
           <section>
-            <h2 className="text-lg font-bold border-b-2 border-[#1a1a2e] pb-2 mb-4">Ringkasan Mingguan</h2>
+            <h2 className="text-lg font-bold border-b-2 border-[#1a1a2e] pb-2 mb-4">{t(lang, 'weeklySummary')}</h2>
             <div className="space-y-3">
               {(content.weekly_summary as WeekSummary[]).map((week, i) => (
                 <div key={i} className="bg-[#f8f8f8] rounded-xl p-4">
@@ -140,7 +135,7 @@ export default function ReportPreview({ report, profile, content }: { report: Re
         {/* Future Plans */}
         {sections.includes('future_plans') && Array.isArray(content.future_plans) && (
           <section>
-            <h2 className="text-lg font-bold border-b-2 border-[#1a1a2e] pb-2 mb-4">Rencana ke Depan</h2>
+            <h2 className="text-lg font-bold border-b-2 border-[#1a1a2e] pb-2 mb-4">{t(lang, 'futurePlans')}</h2>
             <div className="space-y-2">
               {(content.future_plans as FuturePlan[]).map((plan, i) => (
                 <div key={i} className="flex gap-4 py-3 border-b border-[#eee] last:border-0">
@@ -152,7 +147,7 @@ export default function ReportPreview({ report, profile, content }: { report: Re
                   <div>
                     <p className="text-sm font-semibold">{plan.title}</p>
                     <p className="text-sm text-[#444] mt-0.5">{plan.description}</p>
-                    <p className="text-xs text-[#888] mt-1">Manfaat: {plan.expected_benefit}</p>
+                    <p className="text-xs text-[#888] mt-1">{t(lang, 'benefit')}: {plan.expected_benefit}</p>
                   </div>
                 </div>
               ))}
@@ -165,12 +160,12 @@ export default function ReportPreview({ report, profile, content }: { report: Re
           <section className="border-t-2 border-[#1a1a2e] pt-6">
             <div className="flex justify-between items-end">
               <div>
-                <p className="text-sm font-bold">{profile?.name || 'Nama Developer'}</p>
-                <p className="text-xs text-[#666]">{profile?.position || 'Posisi'}</p>
-                <p className="text-xs text-[#666]">{profile?.email || 'Email'}</p>
+                <p className="text-sm font-bold">{profile?.name || t(lang, 'developerName')}</p>
+                <p className="text-xs text-[#666]">{profile?.position || t(lang, 'position')}</p>
+                <p className="text-xs text-[#666]">{profile?.email || t(lang, 'email')}</p>
               </div>
               <div className="text-right text-xs text-[#888]">
-                <p>Sistem Terupdate:</p>
+                <p>{t(lang, 'systemsUpdated')}:</p>
                 {(content.summary as { systems_updated: string[] } | undefined)?.systems_updated?.map((s, i) => (
                   <p key={i} className="font-medium text-[#1a1a2e]">{resolveAlias(s, aliases)}</p>
                 ))}

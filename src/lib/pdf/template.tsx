@@ -1,5 +1,6 @@
 import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
 import { formatDate } from '@/lib/utils'
+import { t, resolveAlias } from '@/lib/report-i18n'
 
 function stripMarkdown(text: string): string {
   return text
@@ -8,12 +9,6 @@ function stripMarkdown(text: string): string {
     .replace(/\*([^*]+)\*/g, '$1')
     .replace(/^\s*[-*+]\s+/gm, '• ')
     .trim()
-}
-
-function resolveAlias(name: string, aliases: Record<string, string>): string {
-  if (aliases[name]) return aliases[name]
-  const entry = Object.entries(aliases).find(([k]) => k.split('/')[1] === name)
-  return entry ? entry[1] : name
 }
 
 const styles = StyleSheet.create({
@@ -49,16 +44,16 @@ export function ReportDocument({ report, profile, content }: {
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>{report.title}</Text>
-          <Text style={styles.headerSub}>{profile?.company || ''} · Periode: {formatDate(report.startDate, lang)} – {formatDate(report.endDate, lang)}</Text>
+          <Text style={styles.headerSub}>{profile?.company || ''} · {t(lang, 'periode')}: {formatDate(report.startDate, lang)} – {formatDate(report.endDate, lang)}</Text>
         </View>
 
         {sections.includes('highlight_stats') && summary != null && (
           <View style={styles.statsRow}>
             {[
-              { label: 'Fitur Baru', value: summary.feature_count },
-              { label: 'Bug Diperbaiki', value: summary.bugfix_count },
-              { label: 'Peningkatan', value: summary.improvement_count },
-              { label: 'Pemeliharaan', value: summary.chore_count },
+              { label: t(lang, 'featureCount'), value: summary.feature_count },
+              { label: t(lang, 'bugfixCount'), value: summary.bugfix_count },
+              { label: t(lang, 'improvementCount'), value: summary.improvement_count },
+              { label: t(lang, 'choreCount'), value: summary.chore_count },
             ].map(({ label, value }) => (
               <View key={label} style={styles.statBox}>
                 <Text style={styles.statNum}>{value}</Text>
@@ -70,18 +65,18 @@ export function ReportDocument({ report, profile, content }: {
 
         {sections.includes('executive_summary') && content.executive_summary != null && (
           <View>
-            <Text style={styles.sectionTitle}>Ringkasan Eksekutif</Text>
+            <Text style={styles.sectionTitle}>{t(lang, 'executiveSummary')}</Text>
             <Text style={styles.para}>{stripMarkdown(content.executive_summary as string)}</Text>
           </View>
         )}
 
         {sections.includes('key_highlights') && Array.isArray(content.key_highlights) && (
           <View>
-            <Text style={styles.sectionTitle}>Pencapaian Utama</Text>
+            <Text style={styles.sectionTitle}>{t(lang, 'keyHighlights')}</Text>
             {(content.key_highlights as { title: string; system: string; description: string }[]).map((h, i) => (
               <View key={i} style={styles.highlightBox}>
                 <Text style={styles.highlightTitle}>{i + 1}. {h.title}</Text>
-                <Text style={styles.small}>{h.system}</Text>
+                <Text style={styles.small}>{resolveAlias(h.system, aliases)}</Text>
                 <Text style={[styles.para, { marginTop: 2 }]}>{h.description}</Text>
               </View>
             ))}
@@ -90,13 +85,13 @@ export function ReportDocument({ report, profile, content }: {
 
         {sections.includes('issues_resolved') && Array.isArray(content.issues_resolved) && (
           <View>
-            <Text style={styles.sectionTitle}>Permasalahan Terselesaikan</Text>
+            <Text style={styles.sectionTitle}>{t(lang, 'issuesResolved')}</Text>
             {(content.issues_resolved as { number: number; description: string; system: string; resolved_date: string }[]).map((issue, i) => (
               <View key={i} style={styles.row}>
                 <Text style={{ fontSize: 9, fontFamily: 'Helvetica-Bold', color: '#1a1a2e', width: 20 }}>#{issue.number || i + 1}</Text>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.para}>{issue.description}</Text>
-                  <Text style={styles.small}>{issue.system} · {issue.resolved_date}</Text>
+                  <Text style={styles.small}>{resolveAlias(issue.system, aliases)} · {issue.resolved_date}</Text>
                 </View>
               </View>
             ))}
@@ -105,7 +100,7 @@ export function ReportDocument({ report, profile, content }: {
 
         {sections.includes('weekly_summary') && Array.isArray(content.weekly_summary) && (
           <View>
-            <Text style={styles.sectionTitle}>Ringkasan Mingguan</Text>
+            <Text style={styles.sectionTitle}>{t(lang, 'weeklySummary')}</Text>
             {(content.weekly_summary as { week: string; period: string; focus: string; summary: string; status: string }[]).map((week, i) => (
               <View key={i} style={[styles.highlightBox, { marginBottom: 4 }]}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 2 }}>
@@ -121,14 +116,14 @@ export function ReportDocument({ report, profile, content }: {
 
         {sections.includes('future_plans') && Array.isArray(content.future_plans) && (
           <View>
-            <Text style={styles.sectionTitle}>Rencana ke Depan</Text>
+            <Text style={styles.sectionTitle}>{t(lang, 'futurePlans')}</Text>
             {(content.future_plans as { priority: string; title: string; description: string; expected_benefit: string }[]).map((plan, i) => (
               <View key={i} style={styles.row}>
                 <Text style={{ fontSize: 8, color: plan.priority === 'High' ? '#dc2626' : plan.priority === 'Medium' ? '#d97706' : '#666', width: 40 }}>{plan.priority}</Text>
                 <View style={{ flex: 1 }}>
                   <Text style={[styles.para, { fontFamily: 'Helvetica-Bold' }]}>{plan.title}</Text>
                   <Text style={styles.para}>{plan.description}</Text>
-                  <Text style={styles.small}>Manfaat: {plan.expected_benefit}</Text>
+                  <Text style={styles.small}>{t(lang, 'benefit')}: {plan.expected_benefit}</Text>
                 </View>
               </View>
             ))}
@@ -144,7 +139,7 @@ export function ReportDocument({ report, profile, content }: {
             </View>
             {summary?.systems_updated && (
               <View style={{ alignItems: 'flex-end' }}>
-                <Text style={styles.small}>Sistem:</Text>
+                <Text style={styles.small}>{t(lang, 'systems')}:</Text>
                 {summary.systems_updated.map((s, i) => <Text key={i} style={[styles.small, { color: '#1a1a2e' }]}>{resolveAlias(s, aliases)}</Text>)}
               </View>
             )}

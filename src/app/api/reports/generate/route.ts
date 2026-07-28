@@ -35,9 +35,17 @@ export async function POST(req: NextRequest) {
   try {
     const language = report.language ?? 'id'
     const repoAliases = (report.repoAliases as Record<string, string> | null) ?? {}
+    // repoAliases is keyed by GitHub full_name ("owner/repo"), but commits only
+    // carry the short repo name — also index aliases by their short name so
+    // the lookup below actually matches.
+    const repoAliasesByShortName: Record<string, string> = { ...repoAliases }
+    for (const [fullName, alias] of Object.entries(repoAliases)) {
+      const shortName = fullName.split('/')[1] ?? fullName
+      if (!(shortName in repoAliasesByShortName)) repoAliasesByShortName[shortName] = alias
+    }
     const aliasedCommits = (commits as Record<string, unknown>[]).map(c => ({
       ...c,
-      repo: repoAliases[c.repo as string] ?? c.repo,
+      repo: repoAliasesByShortName[c.repo as string] ?? c.repo,
     }))
     const result = await classifyCommits(aliasedCommits, apiKey, language)
     const sectionList = (report.sections as string[]).filter(s =>

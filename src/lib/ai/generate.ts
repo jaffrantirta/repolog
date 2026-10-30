@@ -6,14 +6,7 @@ import {
   weeklySummaryPrompt,
   futurePlansPrompt,
 } from './prompts'
-import type { CommitClassification } from './classify'
-
-function getClient(apiKey?: string) {
-  return new OpenAI({
-    apiKey: apiKey ?? process.env.ANTHROPIC_API_KEY!,
-    baseURL: process.env.TOKENROUTER_BASE_URL ?? 'https://tokenrouter.io/v1',
-  })
-}
+import { getClient, type CommitClassification } from './classify'
 
 async function ask(client: OpenAI, prompt: string): Promise<string> {
   const res = await client.chat.completions.create({
